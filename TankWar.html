@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="author" content="shellbye">
+    <meta name="co-author" content="baybaylee">
+    <title>Tank War</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .column {
+            width: 5px;
+            height: 5px;
+            border-left: 1px solid #000;
+            border-top: 1px solid #000;
+            display: inline-block;
+        }
+
+        .last_col {
+            border-right: 1px solid #000;
+        }
+
+        .row {
+            margin-top: -12px;
+            padding-left: 10px;
+        }
+
+        .last_row {
+            border-bottom: 1px solid #000;;
+        }
+
+        #zone {
+            padding-top: 10px;
+            float: left;
+        }
+
+        #control {
+            margin-left: 5px;
+            margin-top: 7px;
+            float: left;
+            border: 1px solid #000;
+            height: 318px;
+            padding: 20px 10px 20px 10px;
+            width: 184px;
+        }
+    </style>
+</head>
+<body onkeydown="keyDown()">
+<div id="zone">
+
+</div>
+<div id="control">
+    <label for="speed">
+        Current Speed:<input id="speed" value="" readonly>
+    </label>
+    <br>
+    <label for="score">
+        Current Score:<input id="score" value="" readonly>
+    </label>
+    <br>
+    <label for="time">
+        Time You used:<input id="time" value="" readonly>
+    </label>
+
+    <p>Press P or Space to Start/Pause</p>
+
+    <p>You can use both</p>
+
+    <p style="margin-left: 50px">↑↓←→</p>
+
+    <p>and</p>
+
+    <p style="margin-left: 55px">W S A D</p>
+
+    <P>to control.</P>
+    <br>
+    <button id="reTry" onclick="init()">reTry</button>
+    <br>
+
+    <p>By
+        <a href="http://baybaylee.github.io/" target="_blank">BaybayLee</a> &
+        <a href="http://shellbye.com" target="_blank">Shellbye</a>
+    </p>
+
+    <p>Source code is
+        <a href="https://github.com/Shellbye/TankWar" target="_blank">here</a>,
+        and demo is <a href="http://shellbye.com/TankWar/" target="_blank">here</a>
+    </p>
+</div>
+</body>
+<script>
+    // left=37, up=38, right=39, down=40
+    /*
+     *   Tank:
+     *    |0|
+     *  |1|2|3|
+     *  |4|5|6|
+     *  |7|8|9|
+     *
+     *  one hour of 2015-05-19
+     *
+     * */
+
+    const U = 38;
+    const D = 40;
+    const L = 37;
+    const R = 39;
+    var enableWASD = true;
+    var width = 180;
+    var height = 120;
+    var tankHead;
+    var isOver = false;
+    var score = 0;
+
+    var myTank;
+    window.onload = function () {
+        init();
+    };
+
+    function init() {
+        console.log("start");
+        initMap(width, height);
+        initTank(28, 20);
+        document.getElementById("score").value = score;
+    }
+
+    function isParameterValid(x, y, direction) {
+        if (x < 1 || x > width || y < 1 || y > height) {
+            return false;
+        }
+    }
+
+    function Tank(x, y, direction) {
+        if (isParameterValid(x, y, direction)) {
+            console.log("illegal parameter");
+            return;
+        }
+
+        // init body and direction
+        this.direction = direction;
+        this.bodys = new Array(10);
+        this.bodys[1] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + (y + 1).toString() + '"]');
+        this.bodys[2] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 1).toString() + '"]');
+        this.bodys[3] = document.querySelector('[x="' + (x + 1).toString() + '"][y="' + (y + 1).toString() + '"]');
+        this.bodys[4] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + y.toString() + '"]');
+        this.bodys[5] = document.querySelector('[x="' + x.toString() + '"][y="' + y.toString() + '"]');
+        this.bodys[6] = document.querySelector('[x="' + (x + 1).toString() + '"][y="' + y.toString() + '"]');
+        this.bodys[7] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + (y - 1).toString() + '"]');
+        this.bodys[8] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 1).toString() + '"]');
+        this.bodys[9] = document.querySelector('[x="' + (x + 1).toString() + '"][y="' + (y - 1).toString() + '"]');
+        if (direction == U) {
+            this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 2).toString() + '"]');
+        } else {
+            this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 2).toString() + '"]');
+        }
+        for (var i = 0; i < 10; i++) {
+            this.bodys[i].style.background = "red";
+        }
+
+        this.tMove = function () {
+            for (var j = 0; j < 10; j++) {
+                var oldX = parseInt(this.bodys[j].getAttribute("x"));
+                var oldY = parseInt(this.bodys[j].getAttribute("y"));
+                if (this.direction == U) {
+                    if (j == 7 || j == 8 || j == 9) this.bodys[j].style.background = "";
+                    this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY + 1).toString() + '"]');
+                } else if (this.direction == D) {
+                    if (j == 1 || j == 2 || j == 3) this.bodys[j].style.background = "";
+                    this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY - 1).toString() + '"]');
+                } else if (this.direction == L) {
+                    if (j == 3 || j == 6 || j == 9) this.bodys[j].style.background = "";
+                    this.bodys[j] = document.querySelector('[x="' + (oldX - 1).toString() + '"][y="' + (oldY).toString() + '"]');
+                } else if (this.direction == R) {
+                    if (j == 1 || j == 4 || j == 7) this.bodys[j].style.background = "";
+                    this.bodys[j] = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
+                }
+                this.bodys[j].style.background = "red";
+            }
+        };
+
+        this.changeDirection = function (d) {
+            if (d == this.direction) {
+                return;
+            }
+            var x = parseInt(this.bodys[5].getAttribute("x"));
+            var y = parseInt(this.bodys[5].getAttribute("y"));
+            this.bodys[0].style.background = "";
+            if (d == U) {
+                this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 2).toString() + '"]');
+            } else if (d == D) {
+                this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 2).toString() + '"]');
+            } else if (d == L) {
+                this.bodys[0] = document.querySelector('[x="' + (x - 2).toString() + '"][y="' + (y).toString() + '"]');
+            } else if (d == R) {
+                this.bodys[0] = document.querySelector('[x="' + (x + 2).toString() + '"][y="' + (y).toString() + '"]');
+            }
+            this.bodys[0].style.background = "red";
+            this.direction = d;
+        }
+    }
+
+    function keyDown() {
+
+    }
+
+    function initTank(x, y) {
+        myTank = new Tank(x, y, U);
+    }
+
+    function initMap() {
+        var zone = document.getElementById("zone");
+        zone.innerHTML = "";
+        for (var i = height; i >= 1; i--) {
+            var row = document.createElement("div");
+            row.setAttribute("class", "row");
+            initRow(row, i.toString());
+            zone.appendChild(row);
+        }
+    }
+
+    function initRow(map, y) {
+        for (var i = 1; i <= width; i++) {
+            var common = document.createElement("div");
+            var className = "column";
+            if (i == width) {
+                className += " last_col";
+            }
+            if (y == 1) {
+                className += " last_row";
+            }
+            common.setAttribute("class", className);
+            common.setAttribute("x", i.toString());
+            common.setAttribute("y", y);
+            map.appendChild(common);
+        }
+    }
+
+</script>
+</html>
