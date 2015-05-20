@@ -124,9 +124,26 @@
         initMap(width, height);
         initTank(28, 20);
         document.getElementById("score").value = score;
+        generateOtherTank();
+        setAllInterval();
+    }
+
+    function clearAllInterval(){
+        clearInterval(myTank.autoMove);
+        clearInterval(bulletsInterval);
+        clearInterval(tanksInterval);
+        for(var i=0; i<tanks.length; i++){
+            clearInterval(tanks[i].autoMove);
+        }
+    }
+
+    function setAllInterval(){
+        for(var i=0; i<tanks.length; i++){
+            tanks[i].autoMove = setInterval("tanks[tanks.length-1].tMove()", 50);
+        }
+        myTank.autoMove = setInterval("myTank.tMove()", 50);
         bulletsInterval = setInterval("moveAllBullets()", 10);
         tanksInterval = setInterval("changeTanksDirection()", 2000);
-        generateOtherTank();
     }
 
     function changeTanksDirection(){
@@ -153,7 +170,6 @@
         }else{
             var tank = new Tank(2, height - 1, D, "black");
             tanks.push(tank);
-            tank.autoMove = setInterval("tanks[tanks.length-1].tMove()", 50);
         }
     }
 
@@ -301,12 +317,10 @@
         }else if(code == 80 || code == 32){
             // 'P'=80, 'Space'=32
             if(stopped == 0){
-                clearInterval(myTank.autoMove);
-                clearInterval(bulletsInterval);
+                clearAllInterval();
                 stopped = 1;
             }else if(stopped == 1){
-                myTank.autoMove = setInterval("myTank.tMove()", 50);
-                bulletsInterval = setInterval("moveAllBullets()", 10);
+                setAllInterval();
                 stopped = 0;
             }
         }else if(code == 81 || code == 13){
@@ -317,7 +331,6 @@
 
     function initTank(x, y) {
         myTank = new Tank(x, y, U, "red");
-        myTank.autoMove = setInterval("myTank.tMove()", 50);
     }
 
     function initMap() {
