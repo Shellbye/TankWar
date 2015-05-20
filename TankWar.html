@@ -45,6 +45,8 @@
             height: 318px;
             padding: 20px 10px 20px 10px;
             width: 184px;
+
+            display: none;
         }
     </style>
 </head>
@@ -111,10 +113,9 @@
     var enableWASD = true;
     var width = 180;
     var height = 120;
-    var tankHead;
     var isOver = false;
+    var stopped = 0;
     var score = 0;
-
     var myTank;
     window.onload = function () {
         init();
@@ -141,6 +142,7 @@
 
         // init body and direction
         this.direction = direction;
+        this.autoMove = 0;
         this.bodys = new Array(10);
         this.bodys[1] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + (y + 1).toString() + '"]');
         this.bodys[2] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 1).toString() + '"]');
@@ -165,15 +167,19 @@
                 var oldX = parseInt(this.bodys[j].getAttribute("x"));
                 var oldY = parseInt(this.bodys[j].getAttribute("y"));
                 if (this.direction == U) {
+                    if (oldY == height) break;
                     if (j == 7 || j == 8 || j == 9) this.bodys[j].style.background = "";
                     this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY + 1).toString() + '"]');
                 } else if (this.direction == D) {
+                    if (oldY == 1) break;
                     if (j == 1 || j == 2 || j == 3) this.bodys[j].style.background = "";
                     this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY - 1).toString() + '"]');
                 } else if (this.direction == L) {
+                    if (oldX == 1) break;
                     if (j == 3 || j == 6 || j == 9) this.bodys[j].style.background = "";
                     this.bodys[j] = document.querySelector('[x="' + (oldX - 1).toString() + '"][y="' + (oldY).toString() + '"]');
                 } else if (this.direction == R) {
+                    if (oldX == width) break;
                     if (j == 1 || j == 4 || j == 7) this.bodys[j].style.background = "";
                     this.bodys[j] = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
                 }
@@ -199,15 +205,32 @@
             }
             this.bodys[0].style.background = "red";
             this.direction = d;
-        }
+        };
     }
 
     function keyDown() {
-
+        var event = arguments.callee.caller.arguments[0] || event;
+        var code = event.which;
+        if(isOver){
+            return;
+        }
+        if ((code >= 37 && code <= 40) || (enableWASD && (code == 65 || code == 87 || code == 68 || code == 83))) {
+            myTank.changeDirection(code);
+        }else if(code == 80 || code == 32){
+            // 'P'=80, 'Space'=32
+            if(stopped == 0){
+                clearInterval(myTank.autoMove);
+                stopped = 1;
+            }else if(stopped == 1){
+                myTank.autoMove = setInterval("myTank.tMove()", 50);
+                stopped = 0;
+            }
+        }
     }
 
     function initTank(x, y) {
         myTank = new Tank(x, y, U);
+        myTank.autoMove = setInterval("myTank.tMove()", 50);
     }
 
     function initMap() {
