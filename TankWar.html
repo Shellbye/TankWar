@@ -137,7 +137,7 @@
         }
     }
 
-    function Tank(x, y, direction) {
+    function Tank(x, y, direction, background) {
         if (isParameterValid(x, y, direction)) {
             console.log("illegal parameter");
             return;
@@ -146,6 +146,7 @@
         // init body and direction
         this.direction = direction;
         this.autoMove = 0;
+        this.background = background;
         this.bodys = new Array(10);
         this.bodys[1] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + (y + 1).toString() + '"]');
         this.bodys[2] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 1).toString() + '"]');
@@ -162,7 +163,7 @@
             this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 2).toString() + '"]');
         }
         for (var i = 0; i < 10; i++) {
-            this.bodys[i].style.background = "red";
+            this.bodys[i].style.background = this.background;
         }
 
         this.tMove = function () {
@@ -186,7 +187,7 @@
                     if (j == 1 || j == 4 || j == 7) this.bodys[j].style.background = "";
                     this.bodys[j] = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
                 }
-                this.bodys[j].style.background = "red";
+                this.bodys[j].style.background = this.background;
             }
         };
 
@@ -206,7 +207,7 @@
             } else if (d == R) {
                 this.bodys[0] = document.querySelector('[x="' + (x + 2).toString() + '"][y="' + (y).toString() + '"]');
             }
-            this.bodys[0].style.background = "red";
+            this.bodys[0].style.background = this.background;
             this.direction = d;
         };
 
@@ -282,7 +283,7 @@
     }
 
     function initTank(x, y) {
-        myTank = new Tank(x, y, U);
+        myTank = new Tank(x, y, U, "red");
         myTank.autoMove = setInterval("myTank.tMove()", 50);
     }
 
