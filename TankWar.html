@@ -42,11 +42,11 @@
             margin-top: 7px;
             float: left;
             border: 1px solid #000;
-            height: 318px;
+            height: 367px;
             padding: 20px 10px 20px 10px;
             width: 184px;
 
-            display: none;
+            /*display: none;*/
         }
     </style>
 </head>
@@ -66,27 +66,20 @@
     <label for="time">
         Time You used:<input id="time" value="" readonly>
     </label>
-
-    <p>Press P or Space to Start/Pause</p>
-
+    <p>Press P or Space to Start/Pause</p><br>
     <p>You can use both</p>
-
     <p style="margin-left: 50px">↑↓←→</p>
-
     <p>and</p>
-
     <p style="margin-left: 55px">W S A D</p>
-
-    <P>to control.</P>
+    <P>to control direction</P><br>
+    <p>Use Q or Enter to fire</p>
     <br>
-    <button id="reTry" onclick="init()">reTry</button>
+    <!--<button id="reTry" onclick="init()">reTry</button>-->
     <br>
-
     <p>By
         <a href="http://baybaylee.github.io/" target="_blank">BaybayLee</a> &
         <a href="http://shellbye.com" target="_blank">Shellbye</a>
     </p>
-
     <p>Source code is
         <a href="https://github.com/Shellbye/TankWar" target="_blank">here</a>,
         and demo is <a href="http://shellbye.com/TankWar/" target="_blank">here</a>
@@ -117,6 +110,8 @@
     var stopped = 0;
     var score = 0;
     var myTank;
+    var bullets = [];
+    var bulletsInterval = 0;
     window.onload = function () {
         init();
     };
@@ -126,6 +121,14 @@
         initMap(width, height);
         initTank(28, 20);
         document.getElementById("score").value = score;
+        bulletsInterval = setInterval("moveAllBullets()", 10);
+    }
+
+    function moveAllBullets(){
+        var len = bullets.length;
+        for(var i=0; i<len; i++){
+            bullets[i].bMove();
+        }
     }
 
     function isParameterValid(x, y, direction) {
@@ -206,6 +209,51 @@
             this.bodys[0].style.background = "red";
             this.direction = d;
         };
+
+        this.shoot = function(){
+            var x = parseInt(this.bodys[0].getAttribute("x"));
+            var y = parseInt(this.bodys[0].getAttribute("y"));
+            var bullet;
+            if (this.direction == U) {
+                bullet = new Bullet(x, y+1, this.direction);
+            } else if (this.direction == D) {
+                bullet = new Bullet(x, y-1, this.direction);
+            } else if (this.direction == L) {
+                bullet = new Bullet(x-1, y, this.direction);
+            } else {
+                bullet = new Bullet(x+1, y, this.direction);
+            }
+            bullets.push(bullet);
+        }
+    }
+
+    function Bullet(x,y,direction){
+        this.direction = direction;
+        this.autoMove = 0;
+        this.body = document.querySelector('[x="' + x.toString() + '"][y="' + y.toString() + '"]');
+        this.body.style.background = "black";
+        this.body.setAttribute("isBullet", "1");
+        this.bMove = function(){
+            var oldX = parseInt(this.body.getAttribute("x"));
+            var oldY = parseInt(this.body.getAttribute("y"));
+            if(oldX == 1 || oldX == width || oldY == 1 || oldY == height){
+                this.body.style.background = "";
+                clearInterval(this.autoMove);
+                bullets.splice(bullets.indexOf(this),1);
+                return
+            }
+            this.body.style.background = "";
+            if (this.direction == U) {
+                this.body = document.querySelector('[x="' + oldX.toString() + '"][y="' + (oldY + 1).toString() + '"]');
+            } else if (this.direction == D) {
+                this.body = document.querySelector('[x="' + oldX.toString() + '"][y="' + (oldY - 1).toString() + '"]');
+            } else if (this.direction == L) {
+                this.body = document.querySelector('[x="' + (oldX - 1).toString() + '"][y="' + (oldY).toString() + '"]');
+            } else if (this.direction == R) {
+                this.body = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
+            }
+            this.body.style.background = "black";
+        }
     }
 
     function keyDown() {
@@ -220,11 +268,16 @@
             // 'P'=80, 'Space'=32
             if(stopped == 0){
                 clearInterval(myTank.autoMove);
+                clearInterval(bulletsInterval);
                 stopped = 1;
             }else if(stopped == 1){
                 myTank.autoMove = setInterval("myTank.tMove()", 50);
+                bulletsInterval = setInterval("moveAllBullets()", 10);
                 stopped = 0;
             }
+        }else if(code == 81 || code == 13){
+            // 'Q'=13, 'Enter'=13
+            myTank.shoot();
         }
     }
 
