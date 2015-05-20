@@ -112,6 +112,9 @@
     var myTank;
     var bullets = [];
     var bulletsInterval = 0;
+    var tanks = [];
+    var tanksInterval = 0;
+    var enemyTankOnSight = 10;
     window.onload = function () {
         init();
     };
@@ -122,6 +125,36 @@
         initTank(28, 20);
         document.getElementById("score").value = score;
         bulletsInterval = setInterval("moveAllBullets()", 10);
+        tanksInterval = setInterval("changeTanksDirection()", 2000);
+        generateOtherTank();
+    }
+
+    function changeTanksDirection(){
+        for(var i=0; i<tanks.length; i++){
+            var t = tanks[i];
+            var tx = parseInt(t.bodys[5].getAttribute("x"));
+            var ty = parseInt(t.bodys[5].getAttribute("y"));
+            var mx = parseInt(myTank.bodys[5].getAttribute("x"));
+            var my = parseInt(myTank.bodys[5].getAttribute("y"));
+            var xd = tx - mx;
+            var yd = ty - my;
+            if(Math.abs(xd) > Math.abs(yd)){
+                // the tank is far away from myTank in x direction
+                t.changeDirection(xd > 0 ? L : R);
+            }else{
+                t.changeDirection(yd > 0 ? D : U);
+            }
+        }
+    }
+
+    function generateOtherTank(){
+        if(tanks.length >= enemyTankOnSight){
+            return;
+        }else{
+            var tank = new Tank(2, height - 1, D, "black");
+            tanks.push(tank);
+            tank.autoMove = setInterval("tanks[tanks.length-1].tMove()", 50);
+        }
     }
 
     function moveAllBullets(){
