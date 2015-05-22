@@ -61,14 +61,11 @@
         Dead Tank:<input id="dead" value="" readonly>
     </label>
     <br>
-    <label for="time">
-        Time You used:<input id="time" value="" readonly>
-    </label>
     <p>Press P or Space to Start/Pause</p><br>
-    <p>You can use both</p>
+    <p>Use</p>
     <p style="margin-left: 50px">↑↓←→</p>
     <P>to control direction</P><br>
-    <p>Use Q or Enter to fire</p>
+    <p>Use F to fire</p>
     <br>
     <button id="reTry" onclick="location.reload()">reTry</button>
     <br>
@@ -112,10 +109,13 @@
         console.log("start");
         initMap(width, height);
         initTank(28, 20);
-        document.getElementById("dead").value = dead;
-        document.getElementById("left").value = totalTank - dead;
         generateOtherTank();
         setAllInterval();
+    }
+
+    function updateInfo(){
+        document.getElementById("dead").value = dead;
+        document.getElementById("left").value = totalTank - dead;
     }
 
     function clearAllInterval(){
@@ -331,6 +331,8 @@
             tanks[this.NO].bodys[i].removeAttribute("tankId");
         }
         tanks[this.NO] = null;
+        dead++;
+        updateInfo();
         generateOtherTank();
     }
 
@@ -399,8 +401,8 @@
                 setAllInterval();
                 stopped = 0;
             }
-        }else if(code == 81 || code == 13){
-            // 'Q'=13, 'Enter'=13
+        }else if(code == 70 || code == 13){
+            // 'F'=70, 'Enter'=13
             myTank.shoot();
         }
     }
