@@ -112,7 +112,7 @@
     var tanks = [];
     var tanksChangeDirectionInterval = 0;
     var tanksInterval = 0;
-    var enemyTankOnSight = 2;
+    var enemyTankOnSight = 10;
     var bulletColor = "grey";
     var myTankColor = "red";
     var enemyColor  = "black";
@@ -156,7 +156,7 @@
             }else{
                 t.changeDirection(getRandomInt(L, D));
             }
-            return;
+            continue;
             // turn to me so enemy is intellectual
             var tx = parseInt(t.bodys[5].getAttribute("x"));
             var ty = parseInt(t.bodys[5].getAttribute("y"));
@@ -175,9 +175,7 @@
     }
 
     function generateOtherTank(){
-        if(tanks.length >= enemyTankOnSight){
-            return;
-        }else{
+        if(tanks.length < enemyTankOnSight){
             var flag = Math.floor(Math.random() * 100 % width);
             var tank;
             if(flag < 33){
@@ -244,22 +242,41 @@
             for (var j = 0; j < 10; j++) {
                 var oldX = parseInt(this.bodys[j].getAttribute("x"));
                 var oldY = parseInt(this.bodys[j].getAttribute("y"));
-                this.bodys[j].removeAttribute("tankId");
                 if (this.direction == U) {
-                    if (oldY == height) break;
-                    if (j == 7 || j == 8 || j == 9) this.bodys[j].style.background = "";
+                    if (oldY == height) {
+                        break;
+                    }
+                    if (j == 7 || j == 8 || j == 9) {
+                        this.bodys[j].style.background = "";
+                        this.bodys[j].removeAttribute("tankId");
+                    }
                     this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY + 1).toString() + '"]');
                 } else if (this.direction == D) {
-                    if (oldY == 1) break;
-                    if (j == 1 || j == 2 || j == 3) this.bodys[j].style.background = "";
+                    if (oldY == 1) {
+                        break;
+                    }
+                    if (j == 1 || j == 2 || j == 3) {
+                        this.bodys[j].style.background = "";
+                        this.bodys[j].removeAttribute("tankId");
+                    }
                     this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY - 1).toString() + '"]');
                 } else if (this.direction == L) {
-                    if (oldX == 1) break;
-                    if (j == 3 || j == 6 || j == 9) this.bodys[j].style.background = "";
+                    if (oldX == 1) {
+                        break;
+                    }
+                    if (j == 3 || j == 6 || j == 9) {
+                        this.bodys[j].style.background = "";
+                        this.bodys[j].removeAttribute("tankId");
+                    }
                     this.bodys[j] = document.querySelector('[x="' + (oldX - 1).toString() + '"][y="' + (oldY).toString() + '"]');
                 } else if (this.direction == R) {
-                    if (oldX == width) break;
-                    if (j == 1 || j == 4 || j == 7) this.bodys[j].style.background = "";
+                    if (oldX == width) {
+                        break;
+                    }
+                    if (j == 1 || j == 4 || j == 7) {
+                        this.bodys[j].style.background = "";
+                        this.bodys[j].removeAttribute("tankId");
+                    }
                     this.bodys[j] = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
                 }
                 this.bodys[j].setAttribute("tankId", this.NO);
@@ -274,16 +291,39 @@
             var x = parseInt(this.bodys[5].getAttribute("x"));
             var y = parseInt(this.bodys[5].getAttribute("y"));
             this.bodys[0].style.background = "";
+            this.bodys[0].removeAttribute("tankId");
+            // when the direction become random, we need more restrict to prevent the tank lost its head
             if (d == U) {
+                if(y >= height - 2) {
+                    this.bodys[0].style.background = this.background;
+                    this.bodys[0].setAttribute("tankId", this.NO);
+                    return;
+                }
                 this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 2).toString() + '"]');
             } else if (d == D) {
+                if(y <= 2) {
+                    this.bodys[0].style.background = this.background;
+                    this.bodys[0].setAttribute("tankId", this.NO);
+                    return;
+                }
                 this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 2).toString() + '"]');
             } else if (d == L) {
+                if(x <= 2) {
+                    this.bodys[0].style.background = this.background;
+                    this.bodys[0].setAttribute("tankId", this.NO);
+                    return;
+                }
                 this.bodys[0] = document.querySelector('[x="' + (x - 2).toString() + '"][y="' + (y).toString() + '"]');
             } else if (d == R) {
+                if(x >= width - 2) {
+                    this.bodys[0].style.background = this.background;
+                    this.bodys[0].setAttribute("tankId", this.NO);
+                    return;
+                }
                 this.bodys[0] = document.querySelector('[x="' + (x + 2).toString() + '"][y="' + (y).toString() + '"]');
             }
             this.bodys[0].style.background = this.background;
+            this.bodys[0].setAttribute("tankId", this.NO);
             this.direction = d;
         };
 
@@ -312,12 +352,12 @@
     }
 
     function turnOffTank(tank){
-        tanks.splice(tanks.indexOf(tank),1);
         clearInterval(tank.autoMove);
         for(var i = 0; i < 10; i++){
             tank.bodys[i].style.background = "";
             tank.bodys[i].removeAttribute("tankId");
         }
+        tanks.splice(tanks.indexOf(tank),1);
         generateOtherTank();
     }
 
@@ -332,7 +372,7 @@
             var oldY = parseInt(this.body.getAttribute("y"));
             if(oldX == 1 || oldX == width || oldY == 1 || oldY == height){
                 turnOffBullet(this);
-                return
+                return;
             }
             if(this.body.hasAttribute("tankId")){
                 console.log("hit");
