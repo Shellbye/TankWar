@@ -55,12 +55,12 @@
 
 </div>
 <div id="control">
-    <label for="speed">
-        Current Speed:<input id="speed" value="" readonly>
+    <label for="left">
+        Left Tank:<input id="left" value="" readonly>
     </label>
     <br>
-    <label for="score">
-        Current Score:<input id="score" value="" readonly>
+    <label for="dead">
+        Dead Tank:<input id="dead" value="" readonly>
     </label>
     <br>
     <label for="time">
@@ -72,7 +72,7 @@
     <P>to control direction</P><br>
     <p>Use Q or Enter to fire</p>
     <br>
-    <!--<button id="reTry" onclick="init()">reTry</button>-->
+    <button id="reTry" onclick="location.reload()">reTry</button>
     <br>
     <p>By
         <a href="http://baybaylee.github.io/" target="_blank">BaybayLee</a> &
@@ -105,7 +105,8 @@
     var height = 60;
     var isOver = false;
     var stopped = 0;
-    var score = 0;
+    var dead = 0;
+    var totalTank = 30;
     var myTank;
     var bullets = [];
     var bulletsInterval = 0;
@@ -124,7 +125,8 @@
         console.log("start");
         initMap(width, height);
         initTank(28, 20);
-        document.getElementById("score").value = score;
+        document.getElementById("dead").value = dead;
+        document.getElementById("left").value = totalTank - dead;
         generateOtherTank();
         setAllInterval();
     }
@@ -210,6 +212,115 @@
         }
     }
 
+    function tankMove(){
+        for (var j = 0; j < 10; j++) {
+            var oldX = parseInt(this.bodys[j].getAttribute("x"));
+            var oldY = parseInt(this.bodys[j].getAttribute("y"));
+            if (this.direction == U) {
+                if (oldY == height) {
+                    break;
+                }
+                if (j == 7 || j == 8 || j == 9) {
+                    this.bodys[j].style.background = "";
+                    this.bodys[j].removeAttribute("tankId");
+                }
+                this.bodys[j] = getDiv(oldX, oldY + 1);
+            } else if (this.direction == D) {
+                if (oldY == 1) {
+                    break;
+                }
+                if (j == 1 || j == 2 || j == 3) {
+                    this.bodys[j].style.background = "";
+                    this.bodys[j].removeAttribute("tankId");
+                }
+                this.bodys[j] = getDiv(oldX, oldY - 1);
+            } else if (this.direction == L) {
+                if (oldX == 1) {
+                    break;
+                }
+                if (j == 3 || j == 6 || j == 9) {
+                    this.bodys[j].style.background = "";
+                    this.bodys[j].removeAttribute("tankId");
+                }
+                this.bodys[j] = getDiv(oldX - 1, oldY);
+            } else if (this.direction == R) {
+                if (oldX == width) {
+                    break;
+                }
+                if (j == 1 || j == 4 || j == 7) {
+                    this.bodys[j].style.background = "";
+                    this.bodys[j].removeAttribute("tankId");
+                }
+                this.bodys[j] = getDiv(oldX + 1, oldY);
+            }
+            this.bodys[j].setAttribute("tankId", this.NO);
+            this.bodys[j].style.background = this.background;
+        }
+    }
+
+    function tankTurn(d){
+        if (d == this.direction) {
+            return;
+        }
+        var x = parseInt(this.bodys[5].getAttribute("x"));
+        var y = parseInt(this.bodys[5].getAttribute("y"));
+        this.bodys[0].style.background = "";
+        this.bodys[0].removeAttribute("tankId");
+        // when the direction become random, we need more restrict to prevent the tank lost its head
+        if (d == U) {
+            if(y >= height - 2) {
+                this.bodys[0].style.background = this.background;
+                this.bodys[0].setAttribute("tankId", this.NO);
+                return;
+            }
+            this.bodys[0] = getDiv(x, y + 2);
+        } else if (d == D) {
+            if(y <= 2) {
+                this.bodys[0].style.background = this.background;
+                this.bodys[0].setAttribute("tankId", this.NO);
+                return;
+            }
+            this.bodys[0] = getDiv(x, y - 2);
+        } else if (d == L) {
+            if(x <= 2) {
+                this.bodys[0].style.background = this.background;
+                this.bodys[0].setAttribute("tankId", this.NO);
+                return;
+            }
+            this.bodys[0] = getDiv(x - 2, y);
+        } else if (d == R) {
+            if(x >= width - 2) {
+                this.bodys[0].style.background = this.background;
+                this.bodys[0].setAttribute("tankId", this.NO);
+                return;
+            }
+            this.bodys[0] = getDiv(x + 2, y);
+        }
+        this.bodys[0].style.background = this.background;
+        this.bodys[0].setAttribute("tankId", this.NO);
+        this.direction = d;
+    }
+
+    function tankShoot(){
+        var x = parseInt(this.bodys[0].getAttribute("x"));
+        var y = parseInt(this.bodys[0].getAttribute("y"));
+        var bullet;
+        if (this.direction == U) {
+            bullet = new Bullet(x, y+1, this.direction, bulletColor);
+        } else if (this.direction == D) {
+            bullet = new Bullet(x, y-1, this.direction, bulletColor);
+        } else if (this.direction == L) {
+            bullet = new Bullet(x-1, y, this.direction, bulletColor);
+        } else {
+            bullet = new Bullet(x+1, y, this.direction, bulletColor);
+        }
+        bullets.push(bullet);
+    }
+
+    function getDiv(x, y){
+        return document.querySelector('[x="' + x.toString() + '"][y="' + y.toString() + '"]');
+    }
+
     function Tank(x, y, direction, background, NO) {
         if (isParameterValid(x, y, direction)) {
             console.log("illegal parameter");
@@ -222,129 +333,30 @@
         this.background = background;
         this.NO = NO;
         this.bodys = new Array(10);
-        this.bodys[1] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + (y + 1).toString() + '"]');
-        this.bodys[2] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 1).toString() + '"]');
-        this.bodys[3] = document.querySelector('[x="' + (x + 1).toString() + '"][y="' + (y + 1).toString() + '"]');
-        this.bodys[4] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + y.toString() + '"]');
-        this.bodys[5] = document.querySelector('[x="' + x.toString() + '"][y="' + y.toString() + '"]');
-        this.bodys[6] = document.querySelector('[x="' + (x + 1).toString() + '"][y="' + y.toString() + '"]');
-        this.bodys[7] = document.querySelector('[x="' + (x - 1).toString() + '"][y="' + (y - 1).toString() + '"]');
-        this.bodys[8] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 1).toString() + '"]');
-        this.bodys[9] = document.querySelector('[x="' + (x + 1).toString() + '"][y="' + (y - 1).toString() + '"]');
+        this.bodys[1] = getDiv(x - 1, y + 1);
+        this.bodys[2] = getDiv(x, y + 1);
+        this.bodys[3] = getDiv(x + 1, y + 1);
+        this.bodys[4] = getDiv(x - 1, y);
+        this.bodys[5] = getDiv(x, y);
+        this.bodys[6] = getDiv(x + 1, y);
+        this.bodys[7] = getDiv(x - 1, y - 1);
+        this.bodys[8] = getDiv(x, y - 1);
+        this.bodys[9] = getDiv(x + 1, y - 1);
         if (direction == U) {
-            this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 2).toString() + '"]');
+            this.bodys[0] = getDiv(x, y + 2);
         } else {
-            this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 2).toString() + '"]');
+            this.bodys[0] = getDiv(x, y - 2);
         }
         for (var i = 0; i < 10; i++) {
             this.bodys[i].style.background = this.background;
             this.bodys[i].setAttribute("tankId", this.NO);
         }
 
-        this.tMove = function () {
-            for (var j = 0; j < 10; j++) {
-                var oldX = parseInt(this.bodys[j].getAttribute("x"));
-                var oldY = parseInt(this.bodys[j].getAttribute("y"));
-                if (this.direction == U) {
-                    if (oldY == height) {
-                        break;
-                    }
-                    if (j == 7 || j == 8 || j == 9) {
-                        this.bodys[j].style.background = "";
-                        this.bodys[j].removeAttribute("tankId");
-                    }
-                    this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY + 1).toString() + '"]');
-                } else if (this.direction == D) {
-                    if (oldY == 1) {
-                        break;
-                    }
-                    if (j == 1 || j == 2 || j == 3) {
-                        this.bodys[j].style.background = "";
-                        this.bodys[j].removeAttribute("tankId");
-                    }
-                    this.bodys[j] = document.querySelector('[x="' + (oldX).toString() + '"][y="' + (oldY - 1).toString() + '"]');
-                } else if (this.direction == L) {
-                    if (oldX == 1) {
-                        break;
-                    }
-                    if (j == 3 || j == 6 || j == 9) {
-                        this.bodys[j].style.background = "";
-                        this.bodys[j].removeAttribute("tankId");
-                    }
-                    this.bodys[j] = document.querySelector('[x="' + (oldX - 1).toString() + '"][y="' + (oldY).toString() + '"]');
-                } else if (this.direction == R) {
-                    if (oldX == width) {
-                        break;
-                    }
-                    if (j == 1 || j == 4 || j == 7) {
-                        this.bodys[j].style.background = "";
-                        this.bodys[j].removeAttribute("tankId");
-                    }
-                    this.bodys[j] = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
-                }
-                this.bodys[j].setAttribute("tankId", this.NO);
-                this.bodys[j].style.background = this.background;
-            }
-        };
+        this.tMove = tankMove;
 
-        this.changeDirection = function (d) {
-            if (d == this.direction) {
-                return;
-            }
-            var x = parseInt(this.bodys[5].getAttribute("x"));
-            var y = parseInt(this.bodys[5].getAttribute("y"));
-            this.bodys[0].style.background = "";
-            this.bodys[0].removeAttribute("tankId");
-            // when the direction become random, we need more restrict to prevent the tank lost its head
-            if (d == U) {
-                if(y >= height - 2) {
-                    this.bodys[0].style.background = this.background;
-                    this.bodys[0].setAttribute("tankId", this.NO);
-                    return;
-                }
-                this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y + 2).toString() + '"]');
-            } else if (d == D) {
-                if(y <= 2) {
-                    this.bodys[0].style.background = this.background;
-                    this.bodys[0].setAttribute("tankId", this.NO);
-                    return;
-                }
-                this.bodys[0] = document.querySelector('[x="' + x.toString() + '"][y="' + (y - 2).toString() + '"]');
-            } else if (d == L) {
-                if(x <= 2) {
-                    this.bodys[0].style.background = this.background;
-                    this.bodys[0].setAttribute("tankId", this.NO);
-                    return;
-                }
-                this.bodys[0] = document.querySelector('[x="' + (x - 2).toString() + '"][y="' + (y).toString() + '"]');
-            } else if (d == R) {
-                if(x >= width - 2) {
-                    this.bodys[0].style.background = this.background;
-                    this.bodys[0].setAttribute("tankId", this.NO);
-                    return;
-                }
-                this.bodys[0] = document.querySelector('[x="' + (x + 2).toString() + '"][y="' + (y).toString() + '"]');
-            }
-            this.bodys[0].style.background = this.background;
-            this.bodys[0].setAttribute("tankId", this.NO);
-            this.direction = d;
-        };
+        this.changeDirection = tankTurn;
 
-        this.shoot = function(){
-            var x = parseInt(this.bodys[0].getAttribute("x"));
-            var y = parseInt(this.bodys[0].getAttribute("y"));
-            var bullet;
-            if (this.direction == U) {
-                bullet = new Bullet(x, y+1, this.direction, bulletColor);
-            } else if (this.direction == D) {
-                bullet = new Bullet(x, y-1, this.direction, bulletColor);
-            } else if (this.direction == L) {
-                bullet = new Bullet(x-1, y, this.direction, bulletColor);
-            } else {
-                bullet = new Bullet(x+1, y, this.direction, bulletColor);
-            }
-            bullets.push(bullet);
-        }
+        this.shoot = tankShoot;
     }
 
     function turnOffBullet(bullet){
@@ -367,7 +379,7 @@
     function Bullet(x,y,direction, bulletColor){
         this.direction = direction;
         this.autoMove = 0;
-        this.body = document.querySelector('[x="' + x.toString() + '"][y="' + y.toString() + '"]');
+        this.body = getDiv(x, y);
         this.body.style.background = bulletColor;
         this.body.setAttribute("isBullet", "1");
         this.bMove = function(){
@@ -391,13 +403,13 @@
             }
             this.body.style.background = "";
             if (this.direction == U) {
-                this.body = document.querySelector('[x="' + oldX.toString() + '"][y="' + (oldY + 1).toString() + '"]');
+                this.body = getDiv(oldX, oldY + 1);
             } else if (this.direction == D) {
-                this.body = document.querySelector('[x="' + oldX.toString() + '"][y="' + (oldY - 1).toString() + '"]');
+                this.body = getDiv(oldX, oldY - 1);
             } else if (this.direction == L) {
-                this.body = document.querySelector('[x="' + (oldX - 1).toString() + '"][y="' + (oldY).toString() + '"]');
+                this.body = getDiv(oldX - 1, oldY);
             } else if (this.direction == R) {
-                this.body = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
+                this.body = getDiv(oldX + 1, oldY);
             }
             this.body.style.background = bulletColor;
         }
