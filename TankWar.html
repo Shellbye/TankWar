@@ -101,8 +101,8 @@
     const D = 40;
     const L = 37;
     const R = 39;
-    var width = 180;
-    var height = 120;
+    var width = 90;
+    var height = 60;
     var isOver = false;
     var stopped = 0;
     var score = 0;
@@ -112,6 +112,9 @@
     var tanks = [];
     var tanksInterval = 0;
     var enemyTankOnSight = 10;
+    var bulletColor = "grey";
+    var myTankColor = "red";
+    var enemyColor  = "black";
     window.onload = function () {
         init();
     };
@@ -165,7 +168,7 @@
         if(tanks.length >= enemyTankOnSight){
             return;
         }else{
-            var tank = new Tank(2, height - 1, D, "black");
+            var tank = new Tank(2, height - 1, D, enemyColor);
             tanks.push(tank);
         }
     }
@@ -262,23 +265,23 @@
             var y = parseInt(this.bodys[0].getAttribute("y"));
             var bullet;
             if (this.direction == U) {
-                bullet = new Bullet(x, y+1, this.direction);
+                bullet = new Bullet(x, y+1, this.direction, bulletColor);
             } else if (this.direction == D) {
-                bullet = new Bullet(x, y-1, this.direction);
+                bullet = new Bullet(x, y-1, this.direction, bulletColor);
             } else if (this.direction == L) {
-                bullet = new Bullet(x-1, y, this.direction);
+                bullet = new Bullet(x-1, y, this.direction, bulletColor);
             } else {
-                bullet = new Bullet(x+1, y, this.direction);
+                bullet = new Bullet(x+1, y, this.direction, bulletColor);
             }
             bullets.push(bullet);
         }
     }
 
-    function Bullet(x,y,direction){
+    function Bullet(x,y,direction, bulletColor){
         this.direction = direction;
         this.autoMove = 0;
         this.body = document.querySelector('[x="' + x.toString() + '"][y="' + y.toString() + '"]');
-        this.body.style.background = "black";
+        this.body.style.background = bulletColor;
         this.body.setAttribute("isBullet", "1");
         this.bMove = function(){
             var oldX = parseInt(this.body.getAttribute("x"));
@@ -299,7 +302,8 @@
             } else if (this.direction == R) {
                 this.body = document.querySelector('[x="' + (oldX + 1).toString() + '"][y="' + (oldY).toString() + '"]');
             }
-            this.body.style.background = "black";
+
+            this.body.style.background = bulletColor;
         }
     }
 
@@ -327,7 +331,7 @@
     }
 
     function initTank(x, y) {
-        myTank = new Tank(x, y, U, "red");
+        myTank = new Tank(x, y, U, myTankColor);
     }
 
     function initMap() {
