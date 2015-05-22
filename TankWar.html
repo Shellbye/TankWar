@@ -134,6 +134,7 @@
         clearInterval(tanksInterval);
         clearInterval(tanksChangeDirectionInterval);
         for(var i=0; i<tanks.length; i++){
+            if(tanks[i] == null) continue;
             clearInterval(tanks[i].autoMove);
         }
     }
@@ -150,6 +151,7 @@
 
     function changeTanksDirection(){
         for(var i=0; i<tanks.length; i++){
+            if(tanks[i] == null) continue;
             var t = tanks[i];
             if(getRandomInt(0, 10) % 3 != 0){
                 t.changeDirection(getRandomInt(L, D));
@@ -197,6 +199,7 @@
 
     function moveAllTanks(){
         for(var i=0; i<tanks.length; i++){
+            if(tanks[i] == null) continue;
             tanks[i].tMove();
         }
     }
@@ -351,13 +354,13 @@
         bullets.splice(bullets.indexOf(bullet),1);
     }
 
-    function turnOffTank(tank){
-        clearInterval(tank.autoMove);
+    function turnOffTank(tankId){
+        clearInterval(tanks[tankId].autoMove);
         for(var i = 0; i < 10; i++){
-            tank.bodys[i].style.background = "";
-            tank.bodys[i].removeAttribute("tankId");
+            tanks[tankId].bodys[i].style.background = "";
+            tanks[tankId].bodys[i].removeAttribute("tankId");
         }
-        tanks.splice(tanks.indexOf(tank),1);
+        tanks[tankId] = null;
         generateOtherTank();
     }
 
@@ -381,8 +384,7 @@
                 if(tankId == -1){
                     // hit me
                 }else{
-                    var tank = tanks[tankId-1];
-                    turnOffTank(tank);
+                    turnOffTank(tankId-1);
                     turnOffBullet(this);
                     return;
                 }
