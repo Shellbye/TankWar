@@ -86,17 +86,6 @@
 </body>
 <script>
     // left=37, up=38, right=39, down=40
-    /*
-     *   Tank:
-     *    |0|
-     *  |1|2|3|
-     *  |4|5|6|
-     *  |7|8|9|
-     *
-     *  one hour of 2015-05-19
-     *
-     * */
-
     const U = 38;
     const D = 40;
     const L = 37;
@@ -333,29 +322,25 @@
         this.background = background;
         this.NO = NO;
         this.bodys = new Array(10);
-        this.bodys[1] = getDiv(x - 1, y + 1);
-        this.bodys[2] = getDiv(x, y + 1);
-        this.bodys[3] = getDiv(x + 1, y + 1);
-        this.bodys[4] = getDiv(x - 1, y);
-        this.bodys[5] = getDiv(x, y);
-        this.bodys[6] = getDiv(x + 1, y);
-        this.bodys[7] = getDiv(x - 1, y - 1);
-        this.bodys[8] = getDiv(x, y - 1);
-        this.bodys[9] = getDiv(x + 1, y - 1);
-        if (direction == U) {
-            this.bodys[0] = getDiv(x, y + 2);
-        } else {
-            this.bodys[0] = getDiv(x, y - 2);
-        }
+        /*
+         *   Tank layout, no matter how many
+         *    |0|
+         *  |1|2|3|
+         *  |4|5|6|
+         *  |7|8|9|
+         * */
+        if (direction == U) {                this.bodys[0] = getDiv(x, y + 2);
+        } else {                             this.bodys[0] = getDiv(x, y - 2);}
+        this.bodys[1] = getDiv(x - 1, y + 1);this.bodys[2] = getDiv(x, y + 1);this.bodys[3] = getDiv(x + 1, y + 1);
+        this.bodys[4] = getDiv(x - 1, y);    this.bodys[5] = getDiv(x, y);    this.bodys[6] = getDiv(x + 1, y);
+        this.bodys[7] = getDiv(x - 1, y - 1);this.bodys[8] = getDiv(x, y - 1);this.bodys[9] = getDiv(x + 1, y - 1);
+
         for (var i = 0; i < 10; i++) {
             this.bodys[i].style.background = this.background;
             this.bodys[i].setAttribute("tankId", this.NO);
         }
-
         this.tMove = tankMove;
-
         this.changeDirection = tankTurn;
-
         this.shoot = tankShoot;
     }
 
