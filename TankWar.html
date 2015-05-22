@@ -69,8 +69,6 @@
     <p>Press P or Space to Start/Pause</p><br>
     <p>You can use both</p>
     <p style="margin-left: 50px">↑↓←→</p>
-    <p>and</p>
-    <p style="margin-left: 55px">W S A D</p>
     <P>to control direction</P><br>
     <p>Use Q or Enter to fire</p>
     <br>
@@ -103,7 +101,6 @@
     const D = 40;
     const L = 37;
     const R = 39;
-    var enableWASD = true;
     var width = 180;
     var height = 120;
     var isOver = false;
@@ -312,7 +309,7 @@
         if(isOver){
             return;
         }
-        if ((code >= 37 && code <= 40) || (enableWASD && (code == 65 || code == 87 || code == 68 || code == 83))) {
+        if (code >= 37 && code <= 40) {
             myTank.changeDirection(code);
         }else if(code == 80 || code == 32){
             // 'P'=80, 'Space'=32
