@@ -189,6 +189,7 @@
 
     function moveAllBullets(){
         for(var i=0; i<bullets.length; i++){
+            if(bullets[i] == null) continue;
             bullets[i].bMove();
         }
     }
@@ -342,7 +343,7 @@
     function bulletDie(){
         this.body.style.background = "";
         clearInterval(this.autoMove);
-        bullets.splice(bullets.indexOf(this),1);
+        bullets[bullets.indexOf(this)] = null;
     }
 
     function bulletMove(){
