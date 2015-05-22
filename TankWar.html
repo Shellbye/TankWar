@@ -45,8 +45,6 @@
             height: 367px;
             padding: 20px 10px 20px 10px;
             width: 184px;
-
-            /*display: none;*/
         }
     </style>
 </head>
@@ -140,29 +138,36 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    function randomChange(tank){
+        if(getRandomInt(0, 10) % 3 != 0){
+            tank.changeDirection(getRandomInt(L, D));
+        }else{
+            tank.changeDirection(getRandomInt(L, D));
+        }
+    }
+
+    function smartChange(tank){
+        var tx = parseInt(tank.bodys[5].getAttribute("x"));
+        var ty = parseInt(tank.bodys[5].getAttribute("y"));
+        var mx = parseInt(myTank.bodys[5].getAttribute("x"));
+        var my = parseInt(myTank.bodys[5].getAttribute("y"));
+        var xd = tx - mx;
+        var yd = ty - my;
+        if(Math.abs(xd) > Math.abs(yd)){
+            // the tank is far away from myTank in x direction
+            tank.changeDirection(xd > 0 ? L : R);
+        }else{
+            tank.changeDirection(yd > 0 ? D : U);
+        }
+    }
+
     function changeTanksDirection(){
         for(var i=0; i<tanks.length; i++){
             if(tanks[i] == null) continue;
-            var t = tanks[i];
-            if(getRandomInt(0, 10) % 3 != 0){
-                t.changeDirection(getRandomInt(L, D));
-            }else{
-                t.changeDirection(getRandomInt(L, D));
-            }
-            continue;
-            // turn to me so enemy is intellectual
-            var tx = parseInt(t.bodys[5].getAttribute("x"));
-            var ty = parseInt(t.bodys[5].getAttribute("y"));
-            var mx = parseInt(myTank.bodys[5].getAttribute("x"));
-            var my = parseInt(myTank.bodys[5].getAttribute("y"));
-            var xd = tx - mx;
-            var yd = ty - my;
-            if(Math.abs(xd) > Math.abs(yd)){
-                // the tank is far away from myTank in x direction
-                t.changeDirection(xd > 0 ? L : R);
-            }else{
-                t.changeDirection(yd > 0 ? D : U);
-            }
+            var tank = tanks[i];
+            randomChange(tank);
+//            continue;
+//            smartChange(tank);
         }
         generateOtherTank();
     }
@@ -172,11 +177,11 @@
             var flag = Math.floor(Math.random() * 100 % width);
             var tank;
             if(flag < 33){
-                tank = new Tank(2, height - 1, D, enemyColor, tanks.length + 1);
+                tank = new Tank(2, height - 1, D, enemyColor, tanks.length);
             }else if(flag < 66){
-                tank = new Tank(Math.floor(width/2), height - 1, D, enemyColor, tanks.length + 1);
+                tank = new Tank(Math.floor(width/2), height - 1, D, enemyColor, tanks.length);
             }else{
-                tank = new Tank(width - 1, height - 1, D, enemyColor, tanks.length + 1);
+                tank = new Tank(width - 1, height - 1, D, enemyColor, tanks.length);
             }
             tanks.push(tank);
         }
@@ -195,10 +200,9 @@
         }
     }
 
-    function isParameterValid(x, y, direction) {
-        if (x < 1 || x > width || y < 1 || y > height) {
-            return false;
-        }
+    function wipeOldTrace(j){
+        this.bodys[j].style.background = "";
+        this.bodys[j].removeAttribute("tankId");
     }
 
     function tankMove(){
@@ -206,40 +210,20 @@
             var oldX = parseInt(this.bodys[j].getAttribute("x"));
             var oldY = parseInt(this.bodys[j].getAttribute("y"));
             if (this.direction == U) {
-                if (oldY == height) {
-                    break;
-                }
-                if (j == 7 || j == 8 || j == 9) {
-                    this.bodys[j].style.background = "";
-                    this.bodys[j].removeAttribute("tankId");
-                }
+                if (oldY == height) break;
+                if (j == 7 || j == 8 || j == 9) this.wipeTrace(j);
                 this.bodys[j] = getDiv(oldX, oldY + 1);
             } else if (this.direction == D) {
-                if (oldY == 1) {
-                    break;
-                }
-                if (j == 1 || j == 2 || j == 3) {
-                    this.bodys[j].style.background = "";
-                    this.bodys[j].removeAttribute("tankId");
-                }
+                if (oldY == 1) break;
+                if (j == 1 || j == 2 || j == 3) this.wipeTrace(j);
                 this.bodys[j] = getDiv(oldX, oldY - 1);
             } else if (this.direction == L) {
-                if (oldX == 1) {
-                    break;
-                }
-                if (j == 3 || j == 6 || j == 9) {
-                    this.bodys[j].style.background = "";
-                    this.bodys[j].removeAttribute("tankId");
-                }
+                if (oldX == 1) break;
+                if (j == 3 || j == 6 || j == 9) this.wipeTrace(j);
                 this.bodys[j] = getDiv(oldX - 1, oldY);
             } else if (this.direction == R) {
-                if (oldX == width) {
-                    break;
-                }
-                if (j == 1 || j == 4 || j == 7) {
-                    this.bodys[j].style.background = "";
-                    this.bodys[j].removeAttribute("tankId");
-                }
+                if (oldX == width) break;
+                if (j == 1 || j == 4 || j == 7) this.wipeTrace(j);
                 this.bodys[j] = getDiv(oldX + 1, oldY);
             }
             this.bodys[j].setAttribute("tankId", this.NO);
@@ -311,12 +295,6 @@
     }
 
     function Tank(x, y, direction, background, NO) {
-        if (isParameterValid(x, y, direction)) {
-            console.log("illegal parameter");
-            return;
-        }
-
-        // init body and direction
         this.direction = direction;
         this.autoMove = 0;
         this.background = background;
@@ -342,23 +320,56 @@
         this.tMove = tankMove;
         this.changeDirection = tankTurn;
         this.shoot = tankShoot;
+        this.tDie = tankDie;
+        this.wipeTrace = wipeOldTrace;
     }
 
-    function turnOffBullet(bullet){
-        bullet.body.style.background = "";
-        bullet.body.removeAttribute("isBullet");
-        clearInterval(bullet.autoMove);
-        bullets.splice(bullets.indexOf(bullet),1);
-    }
-
-    function turnOffTank(tankId){
-        clearInterval(tanks[tankId].autoMove);
+    function tankDie(){
+        clearInterval(tanks[this.NO].autoMove);
         for(var i = 0; i < 10; i++){
-            tanks[tankId].bodys[i].style.background = "";
-            tanks[tankId].bodys[i].removeAttribute("tankId");
+            tanks[this.NO].bodys[i].style.background = "";
+            tanks[this.NO].bodys[i].removeAttribute("tankId");
         }
-        tanks[tankId] = null;
+        tanks[this.NO] = null;
         generateOtherTank();
+    }
+
+    function bulletDie(){
+        this.body.style.background = "";
+        clearInterval(this.autoMove);
+        bullets.splice(bullets.indexOf(this),1);
+    }
+
+    function bulletMove(){
+        var oldX = parseInt(this.body.getAttribute("x"));
+        var oldY = parseInt(this.body.getAttribute("y"));
+        if(oldX == 1 || oldX == width || oldY == 1 || oldY == height){
+            this.bDie();
+            return;
+        }
+        if(this.body.hasAttribute("tankId")){
+            console.log("hit");
+            // hit a tank
+            var tankId = parseInt(this.body.getAttribute("tankId"));
+            if(tankId == -1){
+                // hit me
+            }else{
+                tanks[tankId].tDie();
+                this.bDie();
+                return;
+            }
+        }
+        this.body.style.background = "";
+        if (this.direction == U) {
+            this.body = getDiv(oldX, oldY + 1);
+        } else if (this.direction == D) {
+            this.body = getDiv(oldX, oldY - 1);
+        } else if (this.direction == L) {
+            this.body = getDiv(oldX - 1, oldY);
+        } else if (this.direction == R) {
+            this.body = getDiv(oldX + 1, oldY);
+        }
+        this.body.style.background = bulletColor;
     }
 
     function Bullet(x,y,direction, bulletColor){
@@ -366,38 +377,8 @@
         this.autoMove = 0;
         this.body = getDiv(x, y);
         this.body.style.background = bulletColor;
-        this.body.setAttribute("isBullet", "1");
-        this.bMove = function(){
-            var oldX = parseInt(this.body.getAttribute("x"));
-            var oldY = parseInt(this.body.getAttribute("y"));
-            if(oldX == 1 || oldX == width || oldY == 1 || oldY == height){
-                turnOffBullet(this);
-                return;
-            }
-            if(this.body.hasAttribute("tankId")){
-                console.log("hit");
-                // hit a tank
-                var tankId = parseInt(this.body.getAttribute("tankId"));
-                if(tankId == -1){
-                    // hit me
-                }else{
-                    turnOffTank(tankId-1);
-                    turnOffBullet(this);
-                    return;
-                }
-            }
-            this.body.style.background = "";
-            if (this.direction == U) {
-                this.body = getDiv(oldX, oldY + 1);
-            } else if (this.direction == D) {
-                this.body = getDiv(oldX, oldY - 1);
-            } else if (this.direction == L) {
-                this.body = getDiv(oldX - 1, oldY);
-            } else if (this.direction == R) {
-                this.body = getDiv(oldX + 1, oldY);
-            }
-            this.body.style.background = bulletColor;
-        }
+        this.bMove = bulletMove;
+        this.bDie = bulletDie;
     }
 
     function keyDown() {
