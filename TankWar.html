@@ -358,6 +358,10 @@
             // hit a tank
             var tankId = parseInt(this.body.getAttribute("tankId"));
             if(tankId == -1){
+                isOver = true;
+                clearAllInterval();
+                alert("Game over");
+                return;
                 // hit me
             }else{
                 tanks[tankId].tDie();
