@@ -91,14 +91,15 @@
         var isOver = false;
         var stopped = 0;
         var dead = 0;
-        var totalTank = 30;
+        var totalTank = 20;
         var myTank;
         var bullets = [];
         var bulletsInterval = 0;
         var tanks = [];
         var tanksChangeDirectionInterval = 0;
+        var allInt = 0;
         var tanksInterval = 0;
-        var enemyTankOnSight = 10;
+        var enemyTankOnSight = 20;
         var bulletColor = "grey";
         var myTankColor = "red";
         var enemyColor  = "black";
@@ -121,9 +122,10 @@
     }
 
     function clearAllInterval(){
-        clearInterval(bulletsInterval);
-        clearInterval(tanksInterval);
-        clearInterval(tanksChangeDirectionInterval);
+//        clearInterval(bulletsInterval);
+//        clearInterval(tanksInterval);
+//        clearInterval(tanksChangeDirectionInterval);
+        clearInterval(allInt);
         for(var i=0; i<tanks.length; i++){
             if(tanks[i] == null) continue;
             clearInterval(tanks[i].autoMove);
@@ -131,9 +133,22 @@
     }
 
     function setAllInterval(){
-        tanksInterval = setInterval("moveAllTanks()", 50);
-        bulletsInterval = setInterval("moveAllBullets()", 10);
-        tanksChangeDirectionInterval = setInterval("changeTanksDirection()", 2000);
+        allInt = setInterval("allInterval()", 1);
+//        tanksInterval = setInterval("moveAllTanks()", 50);
+//        bulletsInterval = setInterval("moveAllBullets()", 10);
+//        tanksChangeDirectionInterval = setInterval("changeTanksDirection()", 2000);
+    }
+
+    var count = 0;
+
+    function allInterval(){
+        count++;
+        if(count % 50 == 0) moveAllTanks();
+        if(count % 10 == 0) moveAllBullets();
+        if(count % 2000 == 0) {
+            changeTanksDirection();
+            count = 0;
+        }
     }
 
     function getRandomInt(min, max) {
@@ -167,14 +182,15 @@
         for(var i=0; i<tanks.length; i++){
             if(tanks[i] == null) continue;
             var tank = tanks[i];
-            randomChange(tank);
+//            randomChange(tank);
 //            continue;
-//            smartChange(tank);
+            smartChange(tank);
         }
         generateOtherTank();
     }
 
     function generateOtherTank(){
+        return;
         if(tanks.length < enemyTankOnSight){
             var flag = Math.floor(Math.random() * 100 % width);
             var tank;
@@ -200,7 +216,7 @@
         for(var i=0; i<tanks.length; i++){
             if(tanks[i] == null) continue;
             tanks[i].tMove();
-            if(Date.now() % 99 == 0){
+            if(Date.now() % 10 == 0){
                 tanks[i].shoot();
             }
         }
@@ -285,13 +301,13 @@
         var y = parseInt(this.bodys[0].getAttribute("y"));
         var bullet;
         if (this.direction == U) {
-            if(y < height) bullet = new Bullet(x, y+1, this.direction, bulletColor);
+            if(y < height) bullet = new Bullet(x, y+1, this.direction, bulletColor, bullets.length);
         } else if (this.direction == D) {
-            if(y > 1) bullet = new Bullet(x, y-1, this.direction, bulletColor);
+            if(y > 1) bullet = new Bullet(x, y-1, this.direction, bulletColor, bullets.length);
         } else if (this.direction == L) {
-            if(x > 1) bullet = new Bullet(x-1, y, this.direction, bulletColor);
+            if(x > 1) bullet = new Bullet(x-1, y, this.direction, bulletColor, bullets.length);
         } else {
-            if(x < width) bullet = new Bullet(x+1, y, this.direction, bulletColor);
+            if(x < width) bullet = new Bullet(x+1, y, this.direction, bulletColor, bullets.length);
         }
         bullets.push(bullet);
     }
@@ -344,6 +360,7 @@
 
     function bulletDie(){
         this.body.style.background = "";
+        this.body.removeAttribute("bulletId");
         clearInterval(this.autoMove);
         bullets[bullets.indexOf(this)] = null;
     }
@@ -372,6 +389,7 @@
             }
         }
         this.body.style.background = "";
+        this.body.removeAttribute("bulletId");
         if (this.direction == U) {
             this.body = getDiv(oldX, oldY + 1);
         } else if (this.direction == D) {
@@ -381,14 +399,26 @@
         } else if (this.direction == R) {
             this.body = getDiv(oldX + 1, oldY);
         }
-        this.body.style.background = bulletColor;
+        if(this.body.hasAttribute("bulletId")){
+            console.log("bullet meet");
+            var id = parseInt(this.body.getAttribute("bulletId"));
+            console.log(id);
+            bullets[id].bDie();
+            bullets[this.id].bDie();
+        }else{
+            this.body.setAttribute("bulletId", this.id);
+            this.body.style.background = bulletColor;
+        }
     }
 
-    function Bullet(x,y,direction, bulletColor){
+    function Bullet(x,y,direction, bulletColor, bulletId){
         this.direction = direction;
         this.autoMove = 0;
         this.body = getDiv(x, y);
         this.body.style.background = bulletColor;
+        this.body.setAttribute("isBullet", "1");
+        this.body.setAttribute("bulletId", bulletId);
+        this.id = bulletId;
         this.bMove = bulletMove;
         this.bDie = bulletDie;
     }
@@ -419,6 +449,7 @@
 
     function initTank(x, y) {
         myTank = new Tank(x, y, U, myTankColor, -1);
+//        tanks.push(myTank);
     }
 
     function initMap() {
