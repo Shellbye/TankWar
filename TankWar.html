@@ -122,9 +122,6 @@
     }
 
     function clearAllInterval(){
-//        clearInterval(bulletsInterval);
-//        clearInterval(tanksInterval);
-//        clearInterval(tanksChangeDirectionInterval);
         clearInterval(allInt);
         for(var i=0; i<tanks.length; i++){
             if(tanks[i] == null) continue;
@@ -134,9 +131,6 @@
 
     function setAllInterval(){
         allInt = setInterval("allInterval()", 1);
-//        tanksInterval = setInterval("moveAllTanks()", 50);
-//        bulletsInterval = setInterval("moveAllBullets()", 10);
-//        tanksChangeDirectionInterval = setInterval("changeTanksDirection()", 2000);
     }
 
     var count = 0;
@@ -190,7 +184,6 @@
     }
 
     function generateOtherTank(){
-        return;
         if(tanks.length < enemyTankOnSight){
             var flag = Math.floor(Math.random() * 100 % width);
             var tank;
@@ -223,8 +216,13 @@
     }
 
     function wipeOldTrace(j){
-        this.bodys[j].style.background = "";
-        this.bodys[j].removeAttribute("tankId");
+        if(this instanceof Tank){
+            this.bodys[j].style.background = "";
+            this.bodys[j].removeAttribute("tankId");
+        }else{
+            this.body.style.background = "";
+            this.body.removeAttribute("bulletId");
+        }
     }
 
     function tankMove(){
@@ -359,8 +357,7 @@
     }
 
     function bulletDie(){
-        this.body.style.background = "";
-        this.body.removeAttribute("bulletId");
+        this.wipeTrace();
         clearInterval(this.autoMove);
         bullets[bullets.indexOf(this)] = null;
     }
@@ -388,8 +385,7 @@
                 return;
             }
         }
-        this.body.style.background = "";
-        this.body.removeAttribute("bulletId");
+        this.wipeTrace();
         if (this.direction == U) {
             this.body = getDiv(oldX, oldY + 1);
         } else if (this.direction == D) {
@@ -400,9 +396,7 @@
             this.body = getDiv(oldX + 1, oldY);
         }
         if(this.body.hasAttribute("bulletId")){
-            console.log("bullet meet");
             var id = parseInt(this.body.getAttribute("bulletId"));
-            console.log(id);
             bullets[id].bDie();
             bullets[this.id].bDie();
         }else{
@@ -421,6 +415,7 @@
         this.id = bulletId;
         this.bMove = bulletMove;
         this.bDie = bulletDie;
+        this.wipeTrace = wipeOldTrace;
     }
 
     function keyDown() {
