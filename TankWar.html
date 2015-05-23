@@ -60,6 +60,9 @@
     <label for="dead">
         Dead Tank:<input id="dead" value="" readonly>
     </label>
+    <label for="smart">
+        Smart Enemy: <input id="smart" type="checkbox">
+    </label>
     <br>
     <p>Press P or Space to Start/Pause</p><br>
     <p>Use</p>
@@ -172,9 +175,11 @@
         for(var i=0; i<tanks.length; i++){
             if(tanks[i] == null) continue;
             var tank = tanks[i];
-//            randomChange(tank);
-//            continue;
-            smartChange(tank);
+            if(document.getElementById("smart").checked){
+                smartChange(tank);
+            }else{
+                randomChange(tank);
+            }
         }
         generateOtherTank();
     }
