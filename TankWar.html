@@ -81,26 +81,28 @@
 </body>
 <script>
     // left=37, up=38, right=39, down=40
-    const U = 38;
-    const D = 40;
-    const L = 37;
-    const R = 39;
-    var width = 90;
-    var height = 60;
-    var isOver = false;
-    var stopped = 0;
-    var dead = 0;
-    var totalTank = 30;
-    var myTank;
-    var bullets = [];
-    var bulletsInterval = 0;
-    var tanks = [];
-    var tanksChangeDirectionInterval = 0;
-    var tanksInterval = 0;
-    var enemyTankOnSight = 10;
-    var bulletColor = "grey";
-    var myTankColor = "red";
-    var enemyColor  = "black";
+    {
+        const U = 38;
+        const D = 40;
+        const L = 37;
+        const R = 39;
+        var width = 90;
+        var height = 60;
+        var isOver = false;
+        var stopped = 0;
+        var dead = 0;
+        var totalTank = 30;
+        var myTank;
+        var bullets = [];
+        var bulletsInterval = 0;
+        var tanks = [];
+        var tanksChangeDirectionInterval = 0;
+        var tanksInterval = 0;
+        var enemyTankOnSight = 10;
+        var bulletColor = "grey";
+        var myTankColor = "red";
+        var enemyColor  = "black";
+    }
     window.onload = function () {
         init();
     };
