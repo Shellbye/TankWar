@@ -94,12 +94,8 @@
         var totalTank = 20;
         var myTank;
         var bullets = [];
-        var bulletsInterval = 0;
         var tanks = [];
-        var tanksChangeDirectionInterval = 0;
         var allInt = 0;
-        var tanksInterval = 0;
-        var enemyTankOnSight = 20;
         var bulletColor = "grey";
         var myTankColor = "red";
         var enemyColor  = "black";
@@ -184,7 +180,7 @@
     }
 
     function generateOtherTank(){
-        if(tanks.length < enemyTankOnSight){
+        if(tanks.length < totalTank){
             var flag = Math.floor(Math.random() * 100 % width);
             var tank;
             if(flag < 33){
