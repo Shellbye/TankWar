@@ -24,7 +24,7 @@
         }
 
         .row {
-            margin-top: -12px;
+            margin-top: -16px;
             padding-left: 10px;
         }
 
@@ -42,7 +42,7 @@
             margin-top: 7px;
             float: left;
             border: 1px solid #000;
-            height: 367px;
+            /*height: 367px;*/
             padding: 20px 10px 20px 10px;
             width: 184px;
         }
@@ -53,6 +53,7 @@
 
 </div>
 <div id="control">
+    <p>Use Chrom for better display</p>
     <label for="left">
         Alive Tank:<input id="left" value="" readonly>
     </label>
@@ -84,7 +85,7 @@
 </body>
 <script>
     // left=37, up=38, right=39, down=40
-    {
+//    {
         const U = 38;
         const D = 40;
         const L = 37;
@@ -102,7 +103,7 @@
         var bulletColor = "grey";
         var myTankColor = "red";
         var enemyColor  = "black";
-    }
+//    }
     window.onload = function () {
         init();
     };
